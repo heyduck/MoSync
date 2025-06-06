@@ -1,42 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MoveSync</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      background: #f8f9fa;
-      margin: 0;
-      padding: 2rem;
-    }
-    h1 { color: #ff5a1f; }
-    button {
-      display: inline-block;
-      margin: 1rem;
-      padding: 1rem 2rem;
-      background: #ff5a1f;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    button:hover { background: #e04d1a; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MoveSync</title>
+<style>
+  body { font-family: sans-serif; text-align: center; background: #f8f9fa; margin: 0; padding: 2rem; }
+  h1 { color: #ff5a1f; }
+  button { margin: 1rem; padding: 1rem 2rem; background: #ff5a1f; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; }
+  button:hover { background: #e04d1a; }
+  img.profile { border-radius: 50%; width: 100px; margin-top: 1rem; }
+</style>
 </head>
 <body>
-  <h1>Welcome to MoveSync!</h1>
-  <p>Track your activities and music in perfect sync.</p>
 
+<h1>Welcome to MoSync!</h1>
+
+<% if (user) { %>
+  <p>Hello, <%= user.name || user.spotifyUserName %>!</p>
+
+  <% if (user.profile || user.spotifyUserProfile) { %>
+    <img class="profile" src="<%= user.profile || user.spotifyUserProfile %>" alt="Profile Image" />
+  <% } %>
+
+  <% if (user.stravaConnected) { %>
+    <p>✅ Connected to Strava</p>
+  <% } else { %>
+    <a href="https://www.strava.com/oauth/authorize?client_id=<%= stravaClientId %>&response_type=code&redirect_uri=http://127.0.0.1:3000/strava/callback&scope=activity:read_all,activity:read&approval_prompt=auto">
+      <button>Connect Strava</button>
+    </a>
+  <% } %>
+
+  <% if (user.spotifyConnected) { %>
+    <p>✅ Connected to Spotify</p>
+  <% } else { %>
+    <a href="https://accounts.spotify.com/authorize?client_id=<%= spotifyClientId %>&response_type=code&redirect_uri=<%= redirectUriSpotify %>&scope=user-read-recently-played&state=123">
+      <button>Connect Spotify</button>
+    </a>
+  <% } %>
+
+  <form action="/logout" method="post" style="margin-top:2rem;">
+    <button type="submit" style="background:#aaa;">Logout</button>
+  </form>
+<% } else { %>
+  <p>Please connect a service to get started!</p>
   <a href="https://www.strava.com/oauth/authorize?client_id=<%= stravaClientId %>&response_type=code&redirect_uri=http://127.0.0.1:3000/strava/callback&scope=activity:read_all,activity:read&approval_prompt=auto">
-    <button>Sign in with Strava</button>
+    <button>Connect Strava</button>
   </a>
-
   <a href="https://accounts.spotify.com/authorize?client_id=<%= spotifyClientId %>&response_type=code&redirect_uri=<%= redirectUriSpotify %>&scope=user-read-recently-played&state=123">
-    <button>Sign in with Spotify</button>
+    <button>Connect Spotify</button>
   </a>
+<% } %>
+
+<% if (user && user.stravaConnected && activities.length > 0) { %>
+  <h2>Your Recent Strava Activities</h2>
+  <table border="1" style="margin: 0 auto; border-collapse: collapse;">
+    <tr>
+      <th>Name</th>
+      <th>Date</th>
+      <th>Time</th>
+      <th>Type</th>
+      <th>Total Time</th>
+    </tr>
+    <% activities.forEach(activity => { %>
+      <tr>
+        <td><%= activity.name %></td>
+        <td><%= activity.date %></td>
+        <td><%= activity.time %></td>
+        <td><%= activity.type %></td>
+        <td><%= activity.elapsedTime %></td>
+      </tr>
+    <% }) %>
+  </table>
+<% } %>
+
+<% if (user && user.spotifyConnected && recentTracks.length > 0) { %>
+  <h2>Your Recently Played Spotify Tracks</h2>
+  <table border="1" style="margin: 0 auto; border-collapse: collapse;">
+    <tr>
+      <th>Song</th>
+      <th>Artist</th>
+      <th>Played At</th>
+    </tr>
+    <% recentTracks.forEach(track => { %>
+      <tr>
+        <td><%= track.song %></td>
+        <td><%= track.artist %></td>
+        <td><%= track.playedAt %></td>
+      </tr>
+    <% }) %>
+  </table>
+<% } %>
+
 </body>
 </html>

@@ -8,3 +8,11 @@ exports.saveTokens = (userId, newTokens) => {
 };
 
 exports.getTokens = (userId) => tokens[userId] || {};
+
+exports.isConnected = (userId) => {
+    const userTokens = tokens[userId] || {};
+    return {
+        strava: !!userTokens.stravaAccessToken,
+        spotify: !!userTokens.spotifyAccessToken,
+    };
+};

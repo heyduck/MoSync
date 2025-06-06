@@ -20,14 +20,22 @@ router.get('/callback', async (req, res) => {
         });
 
         const { access_token, refresh_token, athlete } = response.data;
+       
         saveTokens(athlete.id, { 
             stravaAccessToken: access_token,
             stravaRefreshToken: refresh_token,
-        
             stravaAthleteId: athlete.id,
             stravaAthleteName: athlete.firstname + ' ' + athlete.lastname,
             stravaAthleteProfile: athlete.profile,
         });
+
+        req.session.user = {
+            id: athlete.id, // Store athlete ID in session if needed
+            name: athlete.firstname + ' ' + athlete.lastname,
+            profile: athlete.profile,
+            stravaConnected: true,
+        };
+
         console.log('Strava OAuth tokens saved successfully:', {
             athleteId: athlete.id,
             accessToken: access_token,
