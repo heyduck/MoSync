@@ -34,8 +34,8 @@ router.get('/callback', async (req, res) => {
             refreshToken: refresh_token,
         });
         // Redirect to the success page with athlete ID 
-        res.send('Strava OAuth tokens saved successfully. You can now connect to Spotify.');
-        res.redirect(`http://localhost:3000/strava/success?athleteId=${athlete.id}`);
+        // res.send('Strava OAuth tokens saved successfully. You can now connect to Spotify.');
+        res.redirect(`/`);
     } catch (error) {
         // Handle errors during the OAuth process
         console.error('Error during Strava OAuth callback:', error);

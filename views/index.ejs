@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MoveSync</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 { color: #ff5a1f; }
+    button {
+      display: inline-block;
+      margin: 1rem;
+      padding: 1rem 2rem;
+      background: #ff5a1f;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover { background: #e04d1a; }
+  </style>
+</head>
+<body>
+  <h1>Welcome to MoveSync!</h1>
+  <p>Track your activities and music in perfect sync.</p>
+
+  <a href="https://www.strava.com/oauth/authorize?client_id=<%= stravaClientId %>&response_type=code&redirect_uri=http://127.0.0.1:3000/strava/callback&scope=activity:read_all,activity:read&approval_prompt=auto">
+    <button>Sign in with Strava</button>
+  </a>
+
+  <a href="https://accounts.spotify.com/authorize?client_id=<%= spotifyClientId %>&response_type=code&redirect_uri=<%= redirectUriSpotify %>&scope=user-read-recently-played&state=123">
+    <button>Sign in with Spotify</button>
+  </a>
+</body>
+</html>

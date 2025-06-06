@@ -25,8 +25,8 @@ router.get('/callback', async (req, res) => {
             spotifyRefreshToken: refresh_token,
             spotifyExpiresIn: expires_in,
         });
-
-        res.send('Spotify OAuth tokens saved successfully. You can now use the Spotify API.');
+        res.redirect('/'); // Redirect to the home page or a success page
+        // res.send('Spotify OAuth tokens saved successfully. You can now use the Spotify API.');
         console.log('Spotify OAuth tokens saved successfully:', {
             userId: state,
             accessToken: access_token,

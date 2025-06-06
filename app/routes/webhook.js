@@ -1,8 +1,8 @@
 const express = require('express');
 const { getTokens } = require('../utils/tokenStore');
-const { getActivity } = require('../utils/stravaService');
-const { getRecentlyPlayed } = require('../utils/spotifyService');
-const { matchTracksToActivity } = require('../utils/matchService');
+const { getActivity } = require('../services/stravaService');
+const { getRecentlyPlayed } = require('../services/spotifyService');
+const { matchTracksToActivity } = require('../services/matchService');
 
 const router = express.Router();
 
