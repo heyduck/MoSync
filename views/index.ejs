@@ -74,22 +74,32 @@
   </table>
 <% } %>
 
-<% if (user && user.spotifyConnected && recentTracks.length > 0) { %>
-  <h2>Your Recently Played Spotify Tracks</h2>
-  <table border="1" style="margin: 0 auto; border-collapse: collapse;">
-    <tr>
-      <th>Song</th>
-      <th>Artist</th>
-      <th>Played At</th>
-    </tr>
-    <% recentTracks.forEach(track => { %>
+<% if (user && user.stravaConnected && user.spotifyConnected) { %>
+  <% if (matchingTracks.length > 0) { %>
+    <h2>Songs You Played During Your Activities</h2>
+    <table border="1" style="margin: 0 auto; border-collapse: collapse;">
       <tr>
-        <td><%= track.song %></td>
-        <td><%= track.artist %></td>
-        <td><%= track.playedAt %></td>
+        <th>Song</th>
+        <th>Artist</th>
+        <th>Played At</th>
+        <th>Activity Name</th>
+        <th>Activity Date</th>
+        <th>Activity Type</th>
       </tr>
-    <% }) %>
-  </table>
+      <% matchingTracks.forEach(track => { %>
+        <tr>
+          <td><%= track.song %></td>
+          <td><%= track.artist %></td>
+          <td><%= track.playedAtDisplay %></td>
+          <td><%= track.activityName %></td>
+          <td><%= track.activityDate %></td>
+          <td><%= track.activityType %></td>
+        </tr>
+      <% }) %>
+    </table>
+  <% } else { %>
+    <p>You have no matching playback history.</p>
+  <% } %>
 <% } %>
 
 </body>

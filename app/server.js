@@ -9,6 +9,7 @@ const authSpotify = require('./routes/authSpotify');
 const webhook = require('./routes/webhook');
 const { getTokens } = require('./utils/tokenStore');
 const axios = require('axios');
+const { start } = require('repl');
 
 const app = express();
 app.use(bodyParser.json());
@@ -26,7 +27,8 @@ app.get('/', async (req, res) => {
   const user = req.session.user || null;
   let activities = [];
   let recentTracks = [];
-
+  let matchingTracks = [];
+  
   if (user && user.stravaConnected) {
     const tokens = getTokens(user.id);
 
@@ -40,13 +42,19 @@ app.get('/', async (req, res) => {
         },
       });
 
-      activities = response.data.map(activity => ({
-        name: activity.name,
-        date: new Date(activity.start_date).toLocaleDateString(),
-        time: new Date(activity.start_date).toLocaleTimeString(),
-        type: activity.type,
-        elapsedTime: (activity.elapsed_time / 60).toFixed(1) + ' minutes',
-      }));
+      activities = response.data.map(activity => {
+        const startTime = new Date(activity.start_date);
+        const endTime = new Date(startTime.getTime() + activity.elapsed_time * 1000);
+        return {
+          name: activity.name,
+          date: startTime.toLocaleDateString(),
+          time: startTime.toLocaleTimeString(),
+          type: activity.type,
+          elapsedTime: (activity.elapsed_time / 60).toFixed(1) + ' minutes',
+          startTime,
+          endTime,
+        };
+      });
     } catch (error) {
       console.error('Error fetching Strava activities:', error);
     }
@@ -65,17 +73,33 @@ app.get('/', async (req, res) => {
       recentTracks = response.data.items.map(item => ({
         song: item.track.name,
         artist: item.track.artists.map(artist => artist.name).join(', '),
-        playedAt: new Date(item.played_at).toLocaleString(),
+        playedAt: new Date(item.played_at),
+        playedAtDisplay: new Date(item.played_at).toLocaleString(),
       }));
     } catch (error) {
       console.error('Error fetching Spotify recently played tracks:', error);
     }
   }
-  
+
+  if (activities.length > 0 && recentTracks.length > 0) {
+    activities.forEach(activity => {
+      recentTracks.forEach(track => {
+        if (track.playedAt >= activity.startTime && track.playedAt <= activity.endTime) {
+          matchingTracks.push({
+            ...track,
+            activityName: activity.name,
+            activityType: activity.type,
+            activityDate: activity.date,
+          });
+        }
+      });
+    });
+  }
+
   res.render('index', {
     user,
     activities,
-    recentTracks,
+    matchingTracks,
     stravaClientId: process.env.STRAVA_CLIENT_ID,
     spotifyClientId: process.env.SPOTIFY_CLIENT_ID,
     redirectUriSpotify: process.env.SPOTIFY_REDIRECT_URI,
