@@ -4,6 +4,7 @@ const { saveTokens } = require('../utils/tokenStore');
 const router = express.Router();
 
 router.get('/callback', async (req, res) => {
+    console.log('Received callback from Strava:', req.query);
     const { code } = req.query;
     if (!code) {
         return res.status(400).send('Missing code parameter');

@@ -5,7 +5,8 @@ const {saveTokens} = require('../utils/tokenStore');
 const router = express.Router();
 
 router.get('/callback', async (req, res) => {
-    const { code, state } = req.query;
+    console.log('Received callback from Spotify:', req.query);
+    const { code } = req.query;
 
     try {
         // Step 1: Exchange the authorization code for access and refresh tokens
@@ -21,6 +22,7 @@ router.get('/callback', async (req, res) => {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
         });
+
         const { access_token, refresh_token, expires_in } = response.data;
 
         // Step 2: Fetch user profile information from Spotify
@@ -32,15 +34,10 @@ router.get('/callback', async (req, res) => {
 
         const spotifyUser = profileResponse.data;
 
-        // Step 3: Save the tokens and user information
-        let userId;
-        if (req.session.user && req.session.user.id) {
-            userId = req.session.user.id; // Use existing user ID from session
-        } else {
-            userId = spotifyUser.id; // Use Spotify user ID as a fallback
-        }
+        // Step 3: Determine app user ID (preferring Strava ID from session)
+        const userId = req.session?.user?.id || spotifyUser.id; // Use Spotify user ID if Strava ID is not available
         
-        // Save tokens and user information
+        // Step 4: Save tokens and user information to DB
         saveTokens(userId, {
             spotifyAccessToken: access_token,
             spotifyRefreshToken: refresh_token,
@@ -50,23 +47,20 @@ router.get('/callback', async (req, res) => {
             spotifyUserProfile: spotifyUser.images?.[0]?.url || '', // Save the first profile image URL if available
         });
 
-        // Step 4: Update session user object
-        if (!req.session.user) {
-            req.session.user = {};
-        }
-
+        // Step 5: Update session with Spotify user information
+        if (!req.session.user) req.session.user = {};
         req.session.user.spotifyConnected = true;
         req.session.user.spotifyUserId = spotifyUser.id;
         req.session.user.spotifyUserName = spotifyUser.display_name;
         req.session.user.spotifyUserProfile = spotifyUser.images?.[0]?.url || ''; // Save the first profile image URL if available
 
         console.log('Spotify OAuth tokens saved successfully:', {
+            appUserId: userId,
             spotifyUserId: spotifyUser.id,
             spotifyUserName: spotifyUser.display_name,
         });
 
         res.redirect('/'); // Redirect to the home page or a success page
-
     } catch (error) {
         console.error('Error during Spotify OAuth callback:', error);
         res.status(500).send('Internal Server Error');
